@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { FC, useCallback, useEffect, useMemo, useState, useImperativeHandle } from 'react'
 import { Dimensions, View, ActivityIndicator, StyleSheet } from 'react-native'
 import styled from 'styled-components/native'
 import * as MediaLibrary from 'expo-media-library'
@@ -23,14 +23,22 @@ import {
 import { ImageResult } from 'expo-image-manipulator'
 import ErrorDisplay from './ErrorDisplay'
 
-const AssetsSelector = ({
+const initialAvailableOptions = {
+    first: 100,
+    totalCount: 0,
+    after: '',
+    endCursor: '',
+    hasNextPage: true,
+};
+
+const AssetsSelector = React.forwardRef(({
     Resize,
     Settings,
     Errors,
     Styles,
     Navigator,
     CustomNavigator,
-}: AssetSelectorPropTypes): JSX.Element => {
+}: AssetSelectorPropTypes, ref) => {
     const getScreen = () => Dimensions.get('screen')
 
     const { width, height } = useMemo(() => getScreen(), [])
@@ -45,16 +53,14 @@ const AssetsSelector = ({
     })
 
     const [availableOptions, setAvailableOptions] = useState<PagedInfo>({
-        first: 100,
-        totalCount: 0,
-        after: '',
-        endCursor: '',
-        hasNextPage: true,
+        ...initialAvailableOptions
     })
 
     const [assetItems, setItems] = useState<Asset[]>([])
 
     const [isLoading, setLoading] = useState(true)
+
+    const [shouldReload, setShouldReload] = useState(false)
 
     const [error, setError] = useState<{
         hasError: boolean
@@ -63,6 +69,15 @@ const AssetsSelector = ({
         hasError: false,
         errorType: 'hasErrorWithPermissions',
     })
+
+    useImperativeHandle(ref, () => ({
+        reloadAssets: () => {
+            console.log('AssetsSelector is reloading assets on call by ref')
+            setItems([])
+            setAvailableOptions({ ...initialAvailableOptions })
+            setShouldReload(true)
+        }
+    }));
 
     const loadAssets = useCallback(
         async (params: AssetsOptions) => {
@@ -137,13 +152,21 @@ const AssetsSelector = ({
         getAssets()
     }, [Settings.assetsType, permissions.hasMediaLibraryPermission])
 
+    useEffect(() => {
+        if (shouldReload) {
+            getAssets()
+        }
+    }, [shouldReload])
+
     const getAssets = () => {
         try {
+            console.log(availableOptions)
             if (availableOptions.hasNextPage) {
                 const params: AssetsOptions = {
                     first: 100,
                     mediaType: Settings.assetsType,
-                    sortBy: ['creationTime'],
+                    // sortBy: ['creationTime'], // on android the camera does not treat creationTime well for photos made with it. Only works with modificaitonTime.
+                    sortBy: ['modificationTime'],
                 }
                 if (availableOptions.after)
                     params.after = availableOptions.after
@@ -152,7 +175,7 @@ const AssetsSelector = ({
                 return permissions.hasMediaLibraryPermission
                     ? loadAssets(params)
                     : getMediaLibraryPermission()
-            } 
+            }
         } catch (err) {
             setError({
                 hasError: true,
@@ -322,7 +345,7 @@ const AssetsSelector = ({
             )}
         </Screen>
     )
-}
+})
 
 async function asyncForEach(array: Asset[], callback: any) {
     for (let index = 0; index < array.length; index++) {
