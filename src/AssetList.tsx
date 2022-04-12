@@ -19,7 +19,7 @@ const Item = ({
     videoIcon,
 }: ItemType) => {
     const handleClick = () => {
-        onClick(image)
+        onClick(id)
     }
 
     const {
@@ -108,7 +108,7 @@ export const AssetList = ({
             id={item.id}
             image={item.uri}
             mediaType={item.mediaType}
-            selectedIndex={selectedItems.indexOf(item.uri)}
+            selectedIndex={selectedItems.indexOf(item.id)}
             selectedLength={selectedItems.length}
             onClick={onClick}
             cols={cols}

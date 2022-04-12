@@ -135,17 +135,17 @@ const AssetsSelector = React.forwardRef(({
         }
     }, [])
 
-    const onClickUseCallBack = useCallback((uri: string) => {
+    const onClickUseCallBack = useCallback((id: string) => {
         setSelectedItems((selectedItems) => {
-            const alreadySelected = selectedItems.indexOf(uri) >= 0
+            const alreadySelected = selectedItems.indexOf(id) >= 0
             if (
                 selectedItems.length >= Settings.maxSelection &&
                 !alreadySelected
             )
                 return selectedItems
             if (alreadySelected)
-                return selectedItems.filter((item) => item !== uri)
-            else return [...selectedItems, uri]
+                return selectedItems.filter((item) => item !== id)
+            else return [...selectedItems, id]
         })
     }, [])
 
@@ -161,7 +161,13 @@ const AssetsSelector = React.forwardRef(({
     }, [shouldReload])
 
     useEffect(() => {
-        selectedItems.length > 0 ? onPreviewSourceUpdated(selectedItems[selectedItems.length - 1]) : onPreviewSourceUpdated(null)
+        if (selectedItems.length > 0) {
+            let lastId = selectedItems[selectedItems.length - 1]
+            onPreviewSourceUpdated(assetItems.find(x => x.id == lastId))
+        }
+        else {
+            onPreviewSourceUpdated(undefined)
+        }
     }, [selectedItems])
 
     const getAssets = () => {
@@ -239,13 +245,13 @@ const AssetsSelector = React.forwardRef(({
         () =>
             assetItems
                 .filter(
-                    (asset: { uri: any }) =>
-                        selectedItems.indexOf(asset.uri) !== -1
+                    (asset: { id: any }) =>
+                        selectedItems.indexOf(asset.id) !== -1
                 )
                 .sort(
                     (a, b) =>
-                        selectedItems.indexOf(a.uri) -
-                        selectedItems.indexOf(b.uri)
+                        selectedItems.indexOf(a.id) -
+                        selectedItems.indexOf(b.id)
                 ),
         [selectedItems]
     )

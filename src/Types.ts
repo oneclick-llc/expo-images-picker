@@ -11,7 +11,7 @@ export type AssetSelectorPropTypes = {
     Navigator?: NavigatorType
     Resize?: ResizeType
     CustomNavigator?: CustomNavigator
-    onPreviewSourceUpdated: (uri: string | null) => void
+    onPreviewSourceUpdated: (asset: Asset | undefined) => void
 }
 
 export type ResizeType = {
@@ -152,7 +152,7 @@ export interface ItemType {
     selectedIcon: SelectedIcon
     selectedLabel: SelectedLabel
     videoIcon: VideoIcon
-    onClick(uri: string): void
+    onClick(id: string): void
 }
 
 export type AssetListPropTypes = {
@@ -164,7 +164,7 @@ export type AssetListPropTypes = {
     selectedIcon: SelectedIcon
     selectedLabel: SelectedLabel
     videoIcon: VideoIcon
-    onClick(uri: string): void
+    onClick(id: string): void
     getMoreAssets(): void
 }
 
