@@ -75,6 +75,7 @@ const AssetsSelector = React.forwardRef(({
     useImperativeHandle(ref, () => ({
         reloadAssets: () => {
             console.log('AssetsSelector is reloading assets on call by ref')
+            setSelectedItems([])
             setItems([])
             setAvailableOptions({ ...initialAvailableOptions })
             setShouldReload(true)
@@ -102,7 +103,10 @@ const AssetsSelector = React.forwardRef(({
                         hasNextPage: hasNextPage,
                     })
                     setLoading(false)
-                    return setItems([...assetItems, ...assets])
+                    setItems([...assetItems, ...assets])
+                    if (selectedItems.length < Settings.minSelection) {
+                        setSelectedItems([...selectedItems, assets[0].id])
+                    }
                 })
                 .catch(() => {
                     setLoading(false)
@@ -141,13 +145,20 @@ const AssetsSelector = React.forwardRef(({
     const onClickUseCallBack = useCallback((id: string) => {
         setSelectedItems((selectedItems) => {
             const alreadySelected = selectedItems.indexOf(id) >= 0
-            if (
-                selectedItems.length >= Settings.maxSelection &&
-                !alreadySelected
-            )
+            if (selectedItems.length >= Settings.maxSelection &&
+                !alreadySelected) {
                 return selectedItems
-            if (alreadySelected)
-                return selectedItems.filter((item) => item !== id)
+            }
+
+            if (alreadySelected) {
+                if (selectedItems.length - 1 >= Settings.minSelection) {
+                    return selectedItems.filter((item) => item !== id)
+                }
+                else {
+                    return selectedItems
+                }
+            }
+
             else return [...selectedItems, id]
         })
     }, [])
