@@ -78,6 +78,9 @@ const AssetsSelector = React.forwardRef(({
             setItems([])
             setAvailableOptions({ ...initialAvailableOptions })
             setShouldReload(true)
+        },
+        getSelectedAssets: () => {
+            return selectedItems.map(item => assetItems.find(asset => asset.id == item))
         }
     }));
 
