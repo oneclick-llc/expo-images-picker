@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { FlatList } from 'react-native'
+import { FlatList, View, Text } from 'react-native'
 import { Asset } from 'expo-media-library'
 import styled from 'styled-components/native'
 import { ItemType, AssetListPropTypes } from './Types'
@@ -9,11 +9,13 @@ const Item = ({
     screen,
     cols,
     selectedIndex,
+    selectedLength,
     image,
     mediaType,
     onClick,
     margin,
     selectedIcon,
+    selectedLabel,
     videoIcon,
 }: ItemType) => {
     const handleClick = () => {
@@ -27,6 +29,12 @@ const Item = ({
         size: SelectedIconSize,
         bg: SelectedIconBg,
     } = selectedIcon
+
+    const {
+        Component: SelectedLabel,
+        color: SelectedLabelColor,
+        size: SelectedLabelSize,
+    } = selectedLabel
 
     const {
         Component: VideoIndicator,
@@ -55,7 +63,7 @@ const Item = ({
             )}
             {selectedIndex >= 0 && (
                 <Selected selectionColor={SelectedIconBg} margin={margin}>
-                    {SelectedIndicator && SelectedIconName && (
+                    {selectedLength >= 0 && SelectedIndicator && SelectedIconName && (
                         <SelectedIndicator
                             name={SelectedIconName}
                             size={SelectedIconSize}
@@ -63,6 +71,14 @@ const Item = ({
                             index={selectedIndex}
                         />
                     )}
+                    {/* {selectedLength > 1 && SelectedLabel && (
+                        <SelectedLabel
+                            size={SelectedLabelSize}
+                            color={SelectedLabelColor}
+                        >
+                            {selectedIndex + 1}
+                        </SelectedLabel>
+                    )} */}
                 </Selected>
             )}
             <Image source={{ uri: image }} />
@@ -81,6 +97,7 @@ export const AssetList = ({
     cols,
     screen,
     selectedIcon,
+    selectedLabel,
     videoIcon,
 }: AssetListPropTypes) => {
     const _renderItem = ({ item }: { item: Asset }) => (
@@ -89,11 +106,13 @@ export const AssetList = ({
             image={item.uri}
             mediaType={item.mediaType}
             selectedIndex={selectedItems.indexOf(item.id)}
+            selectedLength={selectedItems.length}
             onClick={onClick}
             cols={cols}
             screen={screen}
             margin={margin}
             selectedIcon={selectedIcon}
+            selectedLabel={selectedLabel}
             videoIcon={videoIcon}
         />
     )

@@ -7,6 +7,7 @@ import {
     AssetsOptions,
     getAssetsAsync,
     getAssetInfoAsync,
+    Subscription
 } from 'expo-media-library'
 import { AssetList } from './AssetList'
 import DefaultTopNavigator from './Navigator'
@@ -158,9 +159,12 @@ const AssetsSelector = React.forwardRef(({
         }
     }, [shouldReload])
 
+    useEffect(() => {
+        console.log('useEffect on selectedItems ' + selectedItems.length)
+    }, [selectedItems])
+
     const getAssets = () => {
         try {
-            console.log(availableOptions)
             if (availableOptions.hasNextPage) {
                 const params: AssetsOptions = {
                     first: 100,
@@ -339,6 +343,7 @@ const AssetsSelector = React.forwardRef(({
                         selectedItems={selectedItems}
                         screen={(width * Styles.widgetWidth) / 100}
                         selectedIcon={Styles.selectedIcon}
+                        selectedLabel={Styles.selectedLabel}
                         videoIcon={Styles.videoIcon}
                     />
                 </Widget>

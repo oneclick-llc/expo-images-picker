@@ -67,6 +67,11 @@ export type StylesType = {
         bg: string
         size: number
     }
+    selectedLabel: {
+        Component: JSXElementConstructor<any> | null
+        color: string
+        size: number
+    }
 }
 
 export type NavigatorType = {
@@ -128,6 +133,12 @@ export type SelectedIcon = {
     size: number
 }
 
+export type SelectedLabel = {
+    Component: JSXElementConstructor<any> | null
+    color: string
+    size: number
+}
+
 export interface ItemType {
     id: string
     cols: number
@@ -135,8 +146,10 @@ export interface ItemType {
     image: string
     margin: number
     selectedIndex: number
+    selectedLength: number
     mediaType: MediaTypeValue
     selectedIcon: SelectedIcon
+    selectedLabel: SelectedLabel
     videoIcon: VideoIcon
     onClick(id: string): void
 }
@@ -148,6 +161,7 @@ export type AssetListPropTypes = {
     screen: number
     selectedItems: string[]
     selectedIcon: SelectedIcon
+    selectedLabel: SelectedLabel
     videoIcon: VideoIcon
     onClick(id: string): void
     getMoreAssets(): void
