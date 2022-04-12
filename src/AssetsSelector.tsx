@@ -39,6 +39,7 @@ const AssetsSelector = React.forwardRef(({
     Styles,
     Navigator,
     CustomNavigator,
+    onPreviewSourceUpdated
 }: AssetSelectorPropTypes, ref) => {
     const getScreen = () => Dimensions.get('screen')
 
@@ -134,17 +135,17 @@ const AssetsSelector = React.forwardRef(({
         }
     }, [])
 
-    const onClickUseCallBack = useCallback((id: string) => {
+    const onClickUseCallBack = useCallback((uri: string) => {
         setSelectedItems((selectedItems) => {
-            const alreadySelected = selectedItems.indexOf(id) >= 0
+            const alreadySelected = selectedItems.indexOf(uri) >= 0
             if (
                 selectedItems.length >= Settings.maxSelection &&
                 !alreadySelected
             )
                 return selectedItems
             if (alreadySelected)
-                return selectedItems.filter((item) => item !== id)
-            else return [...selectedItems, id]
+                return selectedItems.filter((item) => item !== uri)
+            else return [...selectedItems, uri]
         })
     }, [])
 
@@ -160,7 +161,7 @@ const AssetsSelector = React.forwardRef(({
     }, [shouldReload])
 
     useEffect(() => {
-        console.log('useEffect on selectedItems ' + selectedItems.length)
+        selectedItems.length > 0 ? onPreviewSourceUpdated(selectedItems[selectedItems.length - 1]) : onPreviewSourceUpdated(null)
     }, [selectedItems])
 
     const getAssets = () => {
@@ -238,13 +239,13 @@ const AssetsSelector = React.forwardRef(({
         () =>
             assetItems
                 .filter(
-                    (asset: { id: any }) =>
-                        selectedItems.indexOf(asset.id) !== -1
+                    (asset: { uri: any }) =>
+                        selectedItems.indexOf(asset.uri) !== -1
                 )
                 .sort(
                     (a, b) =>
-                        selectedItems.indexOf(a.id) -
-                        selectedItems.indexOf(b.id)
+                        selectedItems.indexOf(a.uri) -
+                        selectedItems.indexOf(b.uri)
                 ),
         [selectedItems]
     )

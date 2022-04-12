@@ -19,7 +19,7 @@ const Item = ({
     videoIcon,
 }: ItemType) => {
     const handleClick = () => {
-        onClick(id)
+        onClick(image)
     }
 
     const {
@@ -63,7 +63,7 @@ const Item = ({
             )}
             {selectedIndex >= 0 && (
                 <Selected selectionColor={SelectedIconBg} margin={margin}>
-                    {selectedLength >= 0 && SelectedIndicator && SelectedIconName && (
+                    {selectedLength == 0 && SelectedIndicator && SelectedIconName && (
                         <SelectedIndicator
                             name={SelectedIconName}
                             size={SelectedIconSize}
@@ -71,14 +71,16 @@ const Item = ({
                             index={selectedIndex}
                         />
                     )}
-                    {/* {selectedLength > 1 && SelectedLabel && (
+                    {selectedLength > 1 && SelectedLabel && (
                         <SelectedLabel
-                            size={SelectedLabelSize}
-                            color={SelectedLabelColor}
+                            style={{
+                                color: SelectedLabelColor,
+                                size: SelectedLabelSize
+                            }}
                         >
                             {selectedIndex + 1}
                         </SelectedLabel>
-                    )} */}
+                    )}
                 </Selected>
             )}
             <Image source={{ uri: image }} />
@@ -105,7 +107,7 @@ export const AssetList = ({
             id={item.id}
             image={item.uri}
             mediaType={item.mediaType}
-            selectedIndex={selectedItems.indexOf(item.id)}
+            selectedIndex={selectedItems.indexOf(item.uri)}
             selectedLength={selectedItems.length}
             onClick={onClick}
             cols={cols}
