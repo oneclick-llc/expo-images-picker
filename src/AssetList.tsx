@@ -63,7 +63,7 @@ const Item = ({
             )}
             {selectedIndex >= 0 && (
                 <Selected selectionColor={SelectedIconBg} margin={margin}>
-                    {selectedLength == 0 && SelectedIndicator && SelectedIconName && (
+                    {selectedLength == 1 && SelectedIndicator && SelectedIconName && (
                         <SelectedIndicator
                             name={SelectedIconName}
                             size={SelectedIconSize}
@@ -75,16 +75,17 @@ const Item = ({
                         <SelectedLabel
                             style={{
                                 color: SelectedLabelColor,
-                                size: SelectedLabelSize
+                                fontSize: SelectedLabelSize
                             }}
                         >
                             {selectedIndex + 1}
                         </SelectedLabel>
                     )}
                 </Selected>
-            )}
+            )
+            }
             <Image source={{ uri: image }} />
-        </ItemContainer>
+        </ItemContainer >
     )
 }
 
