@@ -64,6 +64,8 @@ const AssetsSelector = React.forwardRef(({
 
     const [shouldReload, setShouldReload] = useState(false)
 
+    const [hasLibraryUpdates, setHasLibraryUpdates] = useState<boolean>(false)
+
     const [error, setError] = useState<{
         hasError: boolean
         errorType: IAssetSelectorError
@@ -84,6 +86,47 @@ const AssetsSelector = React.forwardRef(({
             return selectedItems.map(item => assetItems.find(asset => asset.id == item))
         }
     }));
+
+    useEffect(() => {
+        console.log('123 subbed')
+        let subscription = MediaLibrary.addListener((assetChangeEventiOS) => {
+            setHasLibraryUpdates(true)
+        })
+        return () => {
+            console.log('123 unsubbed')
+            subscription.remove()
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!hasLibraryUpdates || !permissions.hasMediaLibraryPermission) {
+            return
+        }
+
+        const params: AssetsOptions = {
+            first: 50,
+            mediaType: Settings.assetsType,
+            // sortBy: ['creationTime'], // on android the camera does not treat creationTime well for photos made with it. Only works with modificaitonTime.
+            sortBy: ['modificationTime'],
+        }
+        setHasLibraryUpdates(false)
+        setLoading(true)
+        getAssetsAsync(params)
+            .then(({ endCursor, assets, hasNextPage }) => {
+                setLoading(false)
+                if (assets.length <= 0) {
+                    console.log('library update hook returned no assets')
+                    return
+                }
+                assets = assets.filter(x => assetItems.findIndex(y => y.id === x.id) < 0)
+                console.log('new assets', assets.length)
+                setItems([...assets, ...assetItems])
+            })
+            .catch((error) => {
+                setLoading(false)
+                console.log('library update hook finished with error', error)
+            })
+    }, [hasLibraryUpdates]);
 
     const loadAssets = useCallback(
         async (params: AssetsOptions) => {
