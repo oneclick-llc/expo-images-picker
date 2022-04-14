@@ -76,7 +76,6 @@ const AssetsSelector = React.forwardRef(({
 
     useImperativeHandle(ref, () => ({
         reloadAssets: () => {
-            console.log('AssetsSelector is reloading assets on call by ref')
             setSelectedItems([])
             setItems([])
             setAvailableOptions({ ...initialAvailableOptions })
@@ -88,12 +87,10 @@ const AssetsSelector = React.forwardRef(({
     }));
 
     useEffect(() => {
-        console.log('123 subbed')
         let subscription = MediaLibrary.addListener((assetChangeEventiOS) => {
             setHasLibraryUpdates(true)
         })
         return () => {
-            console.log('123 unsubbed')
             subscription.remove()
         };
     }, []);
@@ -115,16 +112,13 @@ const AssetsSelector = React.forwardRef(({
             .then(({ endCursor, assets, hasNextPage }) => {
                 setLoading(false)
                 if (assets.length <= 0) {
-                    console.log('library update hook returned no assets')
                     return
                 }
                 assets = assets.filter(x => assetItems.findIndex(y => y.id === x.id) < 0)
-                console.log('new assets', assets.length)
                 setItems([...assets, ...assetItems])
             })
             .catch((error) => {
                 setLoading(false)
-                console.log('library update hook finished with error', error)
             })
     }, [hasLibraryUpdates]);
 
