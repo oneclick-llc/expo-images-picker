@@ -1,7 +1,8 @@
 import React from 'react'
-import { Text } from 'react-native'
+import { Button, Text, View } from 'react-native'
 import styled from 'styled-components/native'
-import { NavigatorType } from './Types'
+import { NavigatorType, SelectionMode } from './Types'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 const Navigator = ({
     Texts,
@@ -12,6 +13,9 @@ const Navigator = ({
     minSelection,
     buttonTextStyle,
     buttonStyle,
+    mode,
+    onMode,
+    onCamera
 }: NavigatorType) => {
     const handleActionRequest = () => {
         if (!minSelection) return onSuccess()
@@ -21,17 +25,37 @@ const Navigator = ({
     }
     return (
         <Container>
-            <SimpleButton style={buttonStyle} onPress={onBack}>
-                <Text style={buttonTextStyle}>{Texts.back}</Text>
-            </SimpleButton>
+            <LeftContainer>
+                {Texts.back.length > 0 ?
+                    <SimpleButton style={buttonStyle} onPress={onBack}>
+                        <Text style={buttonTextStyle}>{Texts.back}</Text>
+                    </SimpleButton>
+                    : <></>}
+            </LeftContainer>
 
-            <Text style={{ color: midTextColor }}>
-                {selected} {Texts.selected}
-            </Text>
+            <MidContainer>
+                {Texts.selected.length > 0 ?
+                    <Text style={{ color: midTextColor }}>
+                        {selected} {Texts.selected}
+                    </Text>
+                    : <></>}
+            </MidContainer>
 
-            <SimpleButton style={buttonStyle} onPress={handleActionRequest}>
-                <Text style={buttonTextStyle}>{Texts.finish}</Text>
-            </SimpleButton>
+            <RightContainer>
+                <ActionButton onPress={onMode} bgColor={mode == SelectionMode.Single ? '#353535' : 'tomato'} >
+                    <Ionicons name={mode == SelectionMode.Single ? 'albums-outline' : 'albums'} size={24} color={'white'} />
+                </ActionButton>
+
+                <ActionButton onPress={onCamera} bgColor={'#353535'} >
+                    <Ionicons name={'camera-outline'} size={24} color={'white'} />
+                </ActionButton>
+
+                {Texts.finish.length > 0 ?
+                    <SimpleButton style={buttonStyle} onPress={handleActionRequest}>
+                        <Text style={buttonTextStyle}>{Texts.finish}</Text>
+                    </SimpleButton>
+                    : <></>}
+            </RightContainer>
         </Container>
     )
 }
@@ -44,13 +68,39 @@ const SimpleButton = styled.TouchableOpacity`
     width: 100px;
     height: 38px;
 `
+const LeftContainer = styled.View`
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+`
+
+const MidContainer = styled.View`
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+`
+
+const RightContainer = styled.View`
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+`
 
 const Container = styled.View`
     width: 98%;
     margin: 0 auto;
     flex-direction: row;
-    align-items: center;
     justify-content: space-between;
     height: 45px;
     padding: 5px;
+`
+
+const ActionButton = styled.TouchableOpacity`
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    width: 40px;
+    height: 40px;
+    borderRadius: 50px;
+    backgroundColor: ${({ bgColor }) => bgColor || 'white'};
 `

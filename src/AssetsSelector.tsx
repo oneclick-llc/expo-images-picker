@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState, useImperativeHandle } from 'react'
-import { Dimensions, View, ActivityIndicator, StyleSheet } from 'react-native'
+import { Dimensions, View, ActivityIndicator, StyleSheet, Button } from 'react-native'
 import styled from 'styled-components/native'
 import * as MediaLibrary from 'expo-media-library'
 import {
@@ -18,8 +18,10 @@ import {
     IAssetSelectorError,
     IScreen,
     IWidget,
+    IToolbar,
     PagedInfo,
     ResizeType,
+    SelectionMode
 } from './Types'
 import { ImageResult } from 'expo-image-manipulator'
 import ErrorDisplay from './ErrorDisplay'
@@ -39,7 +41,8 @@ const AssetsSelector = React.forwardRef(({
     Styles,
     Navigator,
     CustomNavigator,
-    onPreviewSourceUpdated
+    onPreviewSourceUpdated,
+    onCamera
 }: AssetSelectorPropTypes, ref) => {
     const getScreen = () => Dimensions.get('screen')
 
@@ -73,6 +76,10 @@ const AssetsSelector = React.forwardRef(({
         hasError: false,
         errorType: 'hasErrorWithPermissions',
     })
+
+    const [mode, setMode] = useState(SelectionMode.Single)
+
+    const [previewId, setPreviewId] = useState<string | null>(null)
 
     useImperativeHandle(ref, () => ({
         reloadAssets: () => {
@@ -179,15 +186,67 @@ const AssetsSelector = React.forwardRef(({
         }
     }, [])
 
+    const onModeCallback = useCallback(() => {
+        if (mode === SelectionMode.Single) {
+            setMode(SelectionMode.Multi)
+        } else {
+            setMode(SelectionMode.Single)
+        }
+    }, [mode])
+
+    const onCameraCallback = useCallback(() => {
+        onCamera()
+    }, [])
+
     const onClickUseCallBack = useCallback((id: string) => {
         setSelectedItems((selectedItems) => {
-            const alreadySelected = selectedItems.indexOf(id) >= 0
-            if (selectedItems.length >= Settings.maxSelection &&
-                !alreadySelected) {
+            if (mode == SelectionMode.Multi) {
+                const indexInSelected = selectedItems.findIndex(x => x == id)
+                const alreadySelected = indexInSelected >= 0
+                if (selectedItems.length >= Settings.maxSelection && !alreadySelected) {
+                    return selectedItems
+                }
+
+                if (alreadySelected) {
+                    const isInPreview = selectedItems[indexInSelected] == previewId
+                    if (!isInPreview) {
+                        setPreviewId(id)
+                        return selectedItems
+                    }
+                    if (selectedItems.length - 1 >= Settings.minSelection) {
+                        return selectedItems.filter((item) => item !== id)
+                    }
+                    else {
+                        return selectedItems
+                    }
+                }
+                else {
+                    return [...selectedItems, id]
+                }
+            }
+            else {
+                return [id]
+            }
+        })
+    }, [mode, previewId])
+
+    const onLongClickUseCallBack = useCallback((id: string) => {
+        if (mode === SelectionMode.Single) {
+            setMode(SelectionMode.Multi)
+        }
+        setSelectedItems((selectedItems) => {
+            const indexInSelected = selectedItems.findIndex(x => x == id)
+            const alreadySelected = indexInSelected >= 0
+            if (selectedItems.length >= Settings.maxSelection && !alreadySelected) {
                 return selectedItems
             }
 
             if (alreadySelected) {
+                const isInPreview = selectedItems[indexInSelected] == previewId
+                if (!isInPreview) {
+                    setPreviewId(id)
+                    return selectedItems
+                }
                 if (selectedItems.length - 1 >= Settings.minSelection) {
                     return selectedItems.filter((item) => item !== id)
                 }
@@ -196,9 +255,10 @@ const AssetsSelector = React.forwardRef(({
                 }
             }
 
-            else return [...selectedItems, id]
+            return [...selectedItems, id]
+
         })
-    }, [])
+    }, [mode])
 
     useEffect(() => {
         Errors.onError?.()
@@ -212,12 +272,27 @@ const AssetsSelector = React.forwardRef(({
     }, [shouldReload])
 
     useEffect(() => {
-        if (selectedItems.length > 0) {
-            let lastId = selectedItems[selectedItems.length - 1]
-            onPreviewSourceUpdated(assetItems.find(x => x.id == lastId))
+        if (selectedItems.length > 1 && mode === SelectionMode.Single) {
+            setSelectedItems([selectedItems[selectedItems.length - 1]])
+        }
+    }, [mode])
+
+    useEffect(() => {
+        if (previewId != null) {
+            onPreviewSourceUpdated(assetItems.find(x => x.id == previewId))
         }
         else {
             onPreviewSourceUpdated(undefined)
+        }
+    }, [previewId])
+
+    useEffect(() => {
+        if (selectedItems.length > 0) {
+            let lastId = selectedItems[selectedItems.length - 1]
+            setPreviewId(lastId)
+        }
+        else {
+            setPreviewId(null)
         }
     }, [selectedItems])
 
@@ -373,8 +448,14 @@ const AssetsSelector = React.forwardRef(({
                     minSelection={Navigator.minSelection}
                     buttonTextStyle={Navigator.buttonTextStyle}
                     buttonStyle={Navigator.buttonStyle}
+                    mode={mode}
+                    onMode={onModeCallback}
+                    onCamera={onCameraCallback}
                 />
             )}
+            <Toolbar>
+
+            </Toolbar>
 
             {isLoading ? (
                 <Spinner color={Styles.spinnerColor} />
@@ -398,6 +479,7 @@ const AssetsSelector = React.forwardRef(({
                         data={assetItems}
                         getMoreAssets={getAssets}
                         onClick={onClickUseCallBack}
+                        onLongClick={onLongClickUseCallBack}
                         selectedItems={selectedItems}
                         screen={(width * Styles.widgetWidth) / 100}
                         selectedIcon={Styles.selectedIcon}
@@ -455,6 +537,12 @@ const Widget = styled.View<IWidget>`
     background-color: ${({ bgColor }) => bgColor};
     width: ${({ widgetWidth }) => widgetWidth || 100}%;
     flex: 1;
+`
+
+const Toolbar = styled.View<IToolbar>`
+    margin: 0 auto;
+    background-color: ${({ bgColor }) => bgColor || 'black'};
+    height: ${({ toolbarHeight }) => toolbarHeight || 0}px;
 `
 
 export default AssetsSelector

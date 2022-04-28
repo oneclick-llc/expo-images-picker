@@ -13,6 +13,7 @@ const Item = ({
     image,
     mediaType,
     onClick,
+    onLongClick,
     margin,
     selectedIcon,
     selectedLabel,
@@ -20,6 +21,10 @@ const Item = ({
 }: ItemType) => {
     const handleClick = () => {
         onClick(id)
+    }
+
+    const handleLongClick = () => {
+        onLongClick(id)
     }
 
     const {
@@ -49,6 +54,7 @@ const Item = ({
             screen={screen}
             cols={cols}
             onPress={handleClick}
+            onLongPress={handleLongClick}
         >
             {mediaType === 'video' && (
                 <MediaTypeVideo margin={margin}>
@@ -96,6 +102,7 @@ export const AssetList = ({
     data,
     selectedItems,
     onClick,
+    onLongClick,
     getMoreAssets,
     cols,
     screen,
@@ -111,6 +118,7 @@ export const AssetList = ({
             selectedIndex={selectedItems.indexOf(item.id)}
             selectedLength={selectedItems.length}
             onClick={onClick}
+            onLongClick={onLongClick}
             cols={cols}
             screen={screen}
             margin={margin}

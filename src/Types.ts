@@ -4,6 +4,11 @@ import { StyleProp, TextStyle, ViewStyle } from 'react-native'
 
 declare const AssetsSelector: React.FC<AssetSelectorPropTypes>
 
+export enum SelectionMode {
+    Single,
+    Multi
+}
+
 export type AssetSelectorPropTypes = {
     Settings: SettingsType
     Errors: ErrorsType
@@ -12,6 +17,7 @@ export type AssetSelectorPropTypes = {
     Resize?: ResizeType
     CustomNavigator?: CustomNavigator
     onPreviewSourceUpdated: (asset: Asset | undefined) => void
+    onCamera: () => void
 }
 
 export type ResizeType = {
@@ -86,8 +92,11 @@ export type NavigatorType = {
     minSelection?: number
     buttonTextStyle: StyleProp<TextStyle>
     buttonStyle: StyleProp<ViewStyle>
+    mode: SelectionMode
     onBack(): void
     onSuccess(data?: any): void
+    onMode(): void
+    onCamera(): void
 }
 
 export interface IScreen {
@@ -96,6 +105,11 @@ export interface IScreen {
 
 export interface IWidget {
     widgetWidth: number
+    bgColor: string
+}
+
+export interface IToolbar {
+    toolbarHeight: number
     bgColor: string
 }
 
@@ -153,6 +167,7 @@ export interface ItemType {
     selectedLabel: SelectedLabel
     videoIcon: VideoIcon
     onClick(id: string): void
+    onLongClick(id: string): void
 }
 
 export type AssetListPropTypes = {
@@ -165,6 +180,7 @@ export type AssetListPropTypes = {
     selectedLabel: SelectedLabel
     videoIcon: VideoIcon
     onClick(id: string): void
+    onLongClick(id: string): void
     getMoreAssets(): void
 }
 
